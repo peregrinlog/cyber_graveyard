@@ -1,0 +1,20 @@
+---
+// src/pages/[...slug].astro
+import { getCollection, render } from 'astro:content';
+import MarkdownLayout from '../layouts/MarkdownLayout.astro';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  return pages.map(entry => ({
+    params: { slug: entry.id.replace(/\.md$/, '') },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+---
+
+<MarkdownLayout frontmatter={entry.data} headings={headings}>
+  <Content />
+</MarkdownLayout>

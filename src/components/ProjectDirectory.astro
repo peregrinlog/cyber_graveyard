@@ -1,0 +1,320 @@
+---
+// src/components/ProjectDirectory.astro
+import type { CollectionEntry } from 'astro:content';
+import Tombstone from './Tombstone.astro';
+
+interface Props {
+  projects: CollectionEntry<'projects'>[];
+}
+
+const { projects } = Astro.props;
+---
+
+<div class="directory-container">
+  <!-- 搜索与筛选面板 // SEARCH & FILTER PANEL -->
+  <div class="filter-panel">
+    <div class="search-box-wrapper">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        id="directorySearch" 
+        placeholder="搜索项目名称、死因或技术栈... // SEARCH" 
+        class="cyber-search-input"
+        autocomplete="off"
+      />
+      <div class="search-glow-bar"></div>
+    </div>
+    
+    <div class="filter-tabs-wrapper">
+      <button class="filter-tab active" data-status="all">
+        <span class="tab-indicator"></span>
+        ALL // 全部
+      </button>
+      <button class="filter-tab" data-status="terminated" style="--tab-color: var(--color-status-terminated)">
+        <span class="tab-indicator" style="background: var(--color-status-terminated)"></span>
+        TERMINATED
+      </button>
+      <button class="filter-tab" data-status="abandoned" style="--tab-color: var(--color-status-abandoned)">
+        <span class="tab-indicator" style="background: var(--color-status-abandoned)"></span>
+        ABANDONED
+      </button>
+      <button class="filter-tab" data-status="deprecated" style="--tab-color: var(--color-status-deprecated)">
+        <span class="tab-indicator" style="background: var(--color-status-deprecated)"></span>
+        DEPRECATED
+      </button>
+      <button class="filter-tab" data-status="liquidated" style="--tab-color: var(--color-status-liquidated)">
+        <span class="tab-indicator" style="background: var(--color-status-liquidated)"></span>
+        LIQUIDATED
+      </button>
+      <button class="filter-tab" data-status="delisted" style="--tab-color: var(--color-status-delisted)">
+        <span class="tab-indicator" style="background: var(--color-status-delisted)"></span>
+        DELISTED
+      </button>
+    </div>
+  </div>
+
+  <!-- 墓碑网格列表 // TOMBSTONE GRID -->
+  <main class="graveyard" id="graveyardGrid">
+    {projects.map((project) => (
+      <a 
+        href={`/projects/${project.id.replace(/\.md$/, '')}`} 
+        class="tombstone-wrapper-link" 
+        data-title={project.data.title.toLowerCase()}
+        data-cause={project.data.cause.toLowerCase()}
+        data-tech={project.data.tech.join(',').toLowerCase()}
+        data-status={project.data.status}
+        style="text-decoration: none; display: block; color: inherit;"
+      >
+        <Tombstone project={project} />
+      </a>
+    ))}
+  </main>
+</div>
+
+<style>
+  .directory-container {
+    width: 100%;
+  }
+
+  /* 搜索与筛选面板 */
+  .filter-panel {
+    max-width: 1400px;
+    margin: 0 auto 30px;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  @media (min-width: 992px) {
+    .filter-panel {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+
+  /* 搜索框 */
+  .search-box-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 500px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.5);
+    font-size: 0.95rem;
+  }
+
+  .cyber-search-input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    background: rgba(5, 5, 8, 0.95);
+    border: 1px solid hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.2);
+    border-radius: 4px;
+    color: var(--color-text-primary);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .cyber-search-input:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 15px hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.25);
+  }
+
+  .search-glow-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--color-secondary);
+    box-shadow: 0 0 8px var(--color-secondary);
+    transition: width 0.3s ease;
+  }
+
+  .cyber-search-input:focus ~ .search-glow-bar {
+    width: 100%;
+  }
+
+  /* 筛选页签 */
+  .filter-tabs-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .filter-tab {
+    background: rgba(5, 5, 8, 0.95);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 4px;
+    color: var(--color-text-muted);
+    padding: 8px 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .tab-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-text-muted);
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+
+  .filter-tab:hover {
+    color: var(--color-text-primary);
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+
+  .filter-tab.active {
+    color: var(--tab-color, var(--color-secondary));
+    border-color: var(--tab-color, var(--color-secondary));
+    box-shadow: 0 0 12px hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.15);
+    text-shadow: 0 0 5px hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.2);
+    background: hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.03);
+  }
+
+  .filter-tab.active[data-status="all"] {
+    --tab-color: var(--color-secondary);
+  }
+
+  /* 墓碑网格 */
+  .graveyard {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+  }
+
+  /* 卡片样式已移至 Tombstone.astro，仅保留列表基底样式 */
+
+  /* 过滤动画样式 */
+  .tombstone-wrapper-link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .tombstone-wrapper-link.filtered-out {
+    opacity: 0;
+    transform: scale(0.85);
+    pointer-events: none;
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .graveyard {
+      grid-template-columns: 1fr;
+      padding: 10px 15px 30px;
+    }
+  }
+</style>
+
+<script>
+  function initDirectoryFilters() {
+    const searchInput = document.getElementById('directorySearch') as HTMLInputElement | null;
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    const projectCards = document.querySelectorAll('.tombstone-wrapper-link');
+
+    if (!projectCards.length) return;
+
+    let activeFilter = 'all';
+    let searchQuery = '';
+
+    function filterProjects() {
+      projectCards.forEach((card) => {
+        const title = card.getAttribute('data-title') || '';
+        const cause = card.getAttribute('data-cause') || '';
+        const tech = card.getAttribute('data-tech') || '';
+        const status = card.getAttribute('data-status') || '';
+
+        const matchesSearch = 
+          title.includes(searchQuery) || 
+          cause.includes(searchQuery) || 
+          tech.includes(searchQuery);
+
+        const matchesStatus = 
+          activeFilter === 'all' || 
+          status === activeFilter;
+
+        if (matchesSearch && matchesStatus) {
+          card.classList.remove('filtered-out');
+        } else {
+          card.classList.add('filtered-out');
+        }
+      });
+    }
+
+    // 绑定搜索输入事件
+    if (searchInput) {
+      searchInput.value = '';
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = (e.target as HTMLInputElement).value.toLowerCase().trim();
+        filterProjects();
+      });
+    }
+
+    // 绑定筛选标签点击事件
+    filterTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        filterTabs.forEach((t) => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        activeFilter = tab.getAttribute('data-status') || 'all';
+        filterProjects();
+      });
+    });
+
+    // 鼠标移动卡片视差效果 (Card Parallax on Mouse Move)
+    let isMoving = false;
+    document.addEventListener('mousemove', (e) => {
+      if (isMoving) return;
+      isMoving = true;
+      
+      requestAnimationFrame(() => {
+        const activeCards = document.querySelectorAll('.tombstone-wrapper-link:not(.filtered-out) .tombstone');
+        const mouseX = e.clientX / window.innerWidth - 0.5;
+        const mouseY = e.clientY / window.innerHeight - 0.5;
+        
+        activeCards.forEach((card, index) => {
+          const htmlCard = card as HTMLElement;
+          const speed = (index % 3 + 1) * 3; // 视差位移系数
+          const x = mouseX * speed;
+          const y = mouseY * speed;
+          htmlCard.style.transform = `translate(${x}px, ${y}px)`;
+        });
+        
+        isMoving = false;
+      });
+    });
+  }
+
+  // 兼容 Astro View Transitions
+  document.addEventListener('astro:page-load', initDirectoryFilters);
+  // 普通加载备用
+  initDirectoryFilters();
+</script>

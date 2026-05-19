@@ -1,0 +1,243 @@
+---
+// src/components/CyberMarquee.astro
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  project?: CollectionEntry<'projects'>;
+  frontmatter?: {
+    title: string;
+    description?: string;
+    date?: string;
+    author?: string;
+    tags?: string[];
+    cause?: string;
+    epitaph?: string;
+  };
+  projectCount?: number;
+}
+
+const { project, frontmatter, projectCount = 6 } = Astro.props;
+
+let marqueeText = "";
+let badgeText = "SYSTEM ALERTS";
+let isAlert = false;
+let statusValue = "";
+
+if (project) {
+  // 项目详情页专有数据直接映射
+  const { title, deathDate, tech, status, cause, epitaph, author } = project.data;
+  const tagsStr = tech.join(', ');
+  badgeText = `AUTOPSY: ${status.toUpperCase()}`;
+  isAlert = status === 'terminated' || status === 'liquidated' || status === 'delisted';
+  statusValue = status;
+  
+  marqueeText = `[ DECEASED ] 🪦 项目名称: ${title} // [ DEPARTED ] ⏱️ 忌日: ${deathDate} // [ GUARDIAN ] ✍ 守墓人: ${author} // [ TECH STACK ] 🏷️ 技术栈: ${tagsStr} // [ INCIDENT ] 🚨 致命死因: ${cause} // [ EPITAPH ] 🕯️ "${epitaph}" // [ STATUS ] ☠️ 协议已封存...`;
+} else if (frontmatter && frontmatter.tags && frontmatter.tags.length > 0) {
+  // 经由 MarkdownLayout 包装的详情页面数据映射
+  const { title, date, author, tags = [], cause, epitaph } = frontmatter;
+  const statusTag = tags[tags.length - 1] || 'ARCHIVE';
+  
+  if (cause && epitaph) {
+    // 它是项目详情页的 Autopsy Ticker!
+    badgeText = `AUTOPSY: ${statusTag.toUpperCase()}`;
+    isAlert = statusTag === 'terminated' || statusTag === 'liquidated' || statusTag === 'delisted';
+    statusValue = statusTag.toLowerCase();
+    const techTags = tags.slice(0, tags.length - 1).join(', ');
+    
+    marqueeText = `[ DECEASED ] 🪦 项目名称: ${title} // [ DEPARTED ] ⏱️ 忌日: ${date} // [ GUARDIAN ] ✍ 守墓人: ${author || '守墓人'} // [ TECH STACK ] 🏷️ 技术栈: ${techTags} // [ INCIDENT ] 🚨 致命死因: ${cause} // [ EPITAPH ] 🕯️ "${epitaph}" // [ STATUS ] ☠️ 协议已封存...`;
+  } else {
+    // 它是通用文章页面（如 Manifesto）的 Ticker!
+    badgeText = `LOG: ${statusTag.toUpperCase()}`;
+    isAlert = true;
+    
+    marqueeText = `[ ARCHIVE ] 🪦 遗迹名称: ${title} // [ TIMESTAMP ] ⏱️ 归档时间: ${date || 'UNKNOWN'} // [ RESEARCHER ] ✍ 守墓人: ${author || 'ANONYMOUS'} // [ TAGS ] 🏷️ 标签: ${tags.join(', ')} // [ NOTICE ] ⚠️ 赛博空间数据已归档，历史细节不可磨灭...`;
+  }
+} else {
+  // 首页模式走马灯内容设计（未来感爆棚的赛博状态）
+  badgeText = "LIVE STATUS";
+  isAlert = false;
+  marqueeText = `[ SYSTEM STATUS ] 🟢 GLOBAL CORE MATRIX ONLINE // [ STATS LOG ] 💀 BURIED PROJECTS: ${projectCount} // [ RECENT REGRETS ] 🕯️ DEFI PROTOCOLS RUG PULLED, AI CHATBOTS LIQUIDATED, WEB3 MARKETPLACES DELISTED // [ PROTOCOL ] ⚡ SYSTEM SPEED: 2.4M VIRTUES/SEC // [ MEMORY DUMP ] 🌌 DATA DUMP RETURNING TO STATIC COLD CHAINS // [ FAREWELL ] 🤖 MAY THE SOURCE CODE REST IN PIECES IN THE GITHUB UNDERWORLD...`;
+}
+
+// 拼接并重复内容以形成无缝循环效果
+const repeatedText = `${marqueeText} 🪐 ${marqueeText} 🪐 ${marqueeText}`;
+---
+
+<div class={`cyber-marquee-bar ${isAlert ? 'marquee-alert' : ''}`} data-status={statusValue}>
+  <div class="marquee-badge">
+    <span class="pulse-dot"></span>
+    <span class="badge-label">{badgeText}</span>
+  </div>
+  <div class="marquee-track">
+    <div class="marquee-content">
+      {repeatedText}
+    </div>
+  </div>
+</div>
+
+<style>
+  /* 走马灯外围容器 */
+  /* 走马灯外围容器 */
+  .cyber-marquee-bar {
+    --marquee-color: var(--color-secondary);
+    --marquee-color-h: var(--color-secondary-h);
+    --marquee-color-s: var(--color-secondary-s);
+    --marquee-color-l: var(--color-secondary-l);
+
+    width: 100%;
+    height: 38px;
+    background: color-mix(in srgb, var(--color-bg-base) 95%, transparent);
+    border-top: 1px solid hsla(var(--marquee-color-h), var(--marquee-color-s), var(--marquee-color-l), 0.25);
+    border-bottom: 1px solid hsla(var(--marquee-color-h), var(--marquee-color-s), var(--marquee-color-l), 0.25);
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    z-index: 100;
+    box-shadow: 
+      0 0 15px hsla(var(--marquee-color-h), var(--marquee-color-s), var(--marquee-color-l), 0.08),
+      inset 0 0 8px hsla(var(--marquee-color-h), var(--marquee-color-s), var(--marquee-color-l), 0.05);
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* 警告状态颜色变换 */
+  .cyber-marquee-bar.marquee-alert {
+    --marquee-color: var(--color-primary);
+    --marquee-color-h: var(--color-primary-h);
+    --marquee-color-s: var(--color-primary-s);
+    --marquee-color-l: var(--color-primary-l);
+  }
+
+  /* 状态系统映射 */
+  .cyber-marquee-bar[data-status="terminated"] {
+    --marquee-color: var(--color-status-terminated);
+    --marquee-color-h: var(--color-primary-h);
+    --marquee-color-s: var(--color-primary-s);
+    --marquee-color-l: var(--color-primary-l);
+  }
+  .cyber-marquee-bar[data-status="abandoned"] {
+    --marquee-color: var(--color-status-abandoned);
+    --marquee-color-h: var(--color-accent-h);
+    --marquee-color-s: var(--color-accent-s);
+    --marquee-color-l: var(--color-accent-l);
+  }
+  .cyber-marquee-bar[data-status="deprecated"] {
+    --marquee-color: var(--color-status-deprecated);
+    --marquee-color-h: var(--color-secondary-h);
+    --marquee-color-s: var(--color-secondary-s);
+    --marquee-color-l: var(--color-secondary-l);
+  }
+  .cyber-marquee-bar[data-status="liquidated"] {
+    --marquee-color: var(--color-status-liquidated);
+    --marquee-color-h: var(--color-warning-h);
+    --marquee-color-s: var(--color-warning-s);
+    --marquee-color-l: var(--color-warning-l);
+  }
+  .cyber-marquee-bar[data-status="delisted"] {
+    --marquee-color: var(--color-status-delisted);
+    --marquee-color-h: var(--color-decorative-h);
+    --marquee-color-s: var(--color-decorative-s);
+    --marquee-color-l: var(--color-decorative-l);
+  }
+
+  /* 左侧警示标识 */
+  .marquee-badge {
+    background: var(--marquee-color);
+    color: #000;
+    padding: 0 14px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    position: relative;
+    z-index: 10;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  /* 呼吸信号灯 */
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    background: #000;
+    border-radius: 50%;
+    animation: flashDot 1.5s infinite alternate;
+  }
+
+  .cyber-marquee-bar.marquee-alert .pulse-dot {
+    background: #000;
+  }
+
+  @keyframes flashDot {
+    0% { opacity: 0.3; }
+    100% { opacity: 1; }
+  }
+
+  /* 滚动跑道 */
+  .marquee-track {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+
+  .marquee-track::before,
+  .marquee-track::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .marquee-track::before {
+    left: 0;
+    background: linear-gradient(90deg, var(--color-bg-base), transparent);
+  }
+
+  .marquee-track::after {
+    right: 0;
+    background: linear-gradient(-90deg, var(--color-bg-base), transparent);
+  }
+
+  /* 滚动内容 */
+  .marquee-content {
+    white-space: nowrap;
+    display: inline-block;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    padding-left: 20px;
+    text-shadow: 0 0 5px hsla(0, 0%, 100%, 0.1);
+    animation: marquee 35s linear infinite;
+    will-change: transform;
+  }
+
+  .cyber-marquee-bar.marquee-alert .marquee-content {
+    color: hsla(var(--marquee-color-h), var(--marquee-color-s), 90%, 0.9);
+  }
+
+  /* 无缝循环位移动画 */
+  @keyframes marquee {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(-33.333%, 0, 0);
+    }
+  }
+
+  /* 鼠标悬浮时暂停滚动，便于用户阅读详细死因或墓志铭 */
+  .cyber-marquee-bar:hover .marquee-content {
+    animation-play-state: paused;
+    color: var(--color-text-primary);
+    text-shadow: 0 0 8px hsla(var(--marquee-color-h), var(--marquee-color-s), var(--marquee-color-l), 0.5);
+  }
+</style>

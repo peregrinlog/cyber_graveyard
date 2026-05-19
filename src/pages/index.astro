@@ -1,0 +1,28 @@
+---
+// 赛博代码坟场 - Cyber Code Graveyard (Index page skeleton)
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import ProjectDirectory from '../components/ProjectDirectory.astro';
+import RitualModal from '../components/RitualModal.astro';
+import Footer from '../components/Footer.astro';
+
+const allProjectEntries = await getCollection('projects');
+const projects = allProjectEntries.sort((a, b) => {
+  return new Date(b.data.deathDate).getTime() - new Date(a.data.deathDate).getTime();
+});
+---
+
+<Layout title="🪦 赛博代码坟场 | Cyber Code Graveyard" description="这里安息着那些曾经辉煌却最终死去的代码项目 - Rest In Pieces">
+  <!-- 头部 Hero 与大屏统计面板 -->
+  <Header projects={projects} />
+  
+  <!-- 全局项目检索目录（小组件化） -->
+  <ProjectDirectory projects={projects} />
+  
+  <!-- 全局赛博超度协议交互弹窗（数字木鱼、全息烧香、像素鲜花） -->
+  <RitualModal />
+  
+  <!-- 统一页脚 -->
+  <Footer />
+</Layout>

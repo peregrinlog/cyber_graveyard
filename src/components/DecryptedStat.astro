@@ -1,0 +1,213 @@
+---
+// src/components/DecryptedStat.astro
+interface Props {
+  target?: number;
+  staticValue?: string;
+  suffix?: string;
+  label: string;
+}
+
+const { target, staticValue, suffix = '', label } = Astro.props;
+const isDynamic = target !== undefined;
+---
+
+<div class="stat-item">
+  {isDynamic ? (
+    <div 
+      class="stat-number dynamic-stat" 
+      data-target={target} 
+      data-suffix={suffix}
+    >
+      0{suffix}
+    </div>
+  ) : (
+    <div class="stat-number">{staticValue}</div>
+  )}
+  <div class="stat-label">{label}</div>
+</div>
+
+<script>
+  function initDynamicStats() {
+    const stats = document.querySelectorAll('.dynamic-stat');
+    if (!stats.length) return;
+
+    stats.forEach(stat => {
+      // 避免重复初始化
+      if (stat.classList.contains('initialized')) return;
+      stat.classList.add('initialized');
+
+      const target = parseInt(stat.getAttribute('data-target') || '0', 10);
+      const suffix = stat.getAttribute('data-suffix') || '';
+      
+      // --- 1. 密码破译启动动画 (Matrix Decrypt) ---
+      const duration = 1200;       // 动画总时长 1.2秒
+      const intervalTime = 40;     // 刷新步长 40ms
+      const totalSteps = duration / intervalTime;
+      let currentStep = 0;
+      const chars = '0123456789ABCDEF!@#$%&*?X';
+
+      // 临时清空内容以启动
+      stat.textContent = '0' + suffix;
+      stat.classList.remove('locked', 'glitch-active');
+
+      const timer = setInterval(() => {
+        currentStep++;
+        const progress = currentStep / totalSteps;
+
+        if (currentStep >= totalSteps) {
+          clearInterval(timer);
+          stat.textContent = target + suffix;
+          stat.classList.add('locked'); // 激活定格脉冲动效
+          return;
+        }
+
+        if (progress < 0.6) {
+          // 前 60% 阶段：呈现高频随机乱码
+          let randomStr = '';
+          const len = String(target).length;
+          for (let i = 0; i < len; i++) {
+            randomStr += chars[Math.floor(Math.random() * chars.length)];
+          }
+          stat.textContent = randomStr + suffix;
+        } else {
+          // 后 40% 阶段：快速收敛至真实数值滚动
+          const currentVal = Math.round(target * progress);
+          stat.textContent = currentVal + suffix;
+        }
+      }, intervalTime);
+
+      // --- 2. 开启周期性遥测同步微闪烁 (Periodic Glitch) ---
+      // 避免多个统计指标同时闪烁，采用随机偏移时间
+      const randomDelay = Math.random() * 2000;
+      
+      setTimeout(() => {
+        setInterval(() => {
+          stat.classList.add('glitch-active');
+          let glitchTicks = 0;
+
+          const glitchTimer = setInterval(() => {
+            glitchTicks++;
+            // 产生短暂的错误随机乱码
+            const tempRandom = Math.floor(Math.random() * (target * 1.5 || 50));
+            stat.textContent = tempRandom + suffix;
+
+            if (glitchTicks > 6) {
+              clearInterval(glitchTimer);
+              stat.textContent = target + suffix;
+              stat.classList.remove('glitch-active');
+            }
+          }, 60);
+        }, 10000 + Math.random() * 3000); // 每 10-13 秒进行一次独立遥测同步
+      }, randomDelay);
+    });
+  }
+
+  // 支持 Astro 的 View Transitions 页面载入生命周期
+  document.addEventListener('astro:page-load', initDynamicStats);
+  
+  // 兜底原生 DOM 加载
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initDynamicStats();
+  } else {
+    document.addEventListener('DOMContentLoaded', initDynamicStats);
+  }
+</script>
+
+<style>
+  .stat-item {
+    text-align: center;
+    background: color-mix(in srgb, var(--color-bg-base) 70%, transparent);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 8px;
+    padding: 15px 30px;
+    min-width: 140px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+  }
+
+  .stat-item:hover {
+    border-color: hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.2);
+    box-shadow: 0 5px 20px hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.1);
+    transform: translateY(-3px);
+  }
+
+  .stat-number {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    text-shadow: 0 0 10px var(--color-accent);
+    line-height: 1.2;
+    margin-bottom: 5px;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* 破译完成时的霓虹光爆脉冲 */
+  .stat-number.locked {
+    animation: neonBurst 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  }
+
+  @keyframes neonBurst {
+    0% {
+      transform: scale(0.9);
+      filter: brightness(1.8);
+      text-shadow: 
+        0 0 15px var(--color-accent),
+        0 0 30px var(--color-secondary),
+        0 0 50px var(--color-primary);
+    }
+    100% {
+      transform: scale(1);
+      filter: brightness(1);
+      text-shadow: 0 0 10px var(--color-accent);
+    }
+  }
+
+  /* 周期性遥测同步时的故障倾斜与色差模拟 */
+  .stat-number.glitch-active {
+    color: var(--color-secondary) !important;
+    text-shadow: 
+      -2px 0 var(--color-primary), 
+      2px 0 var(--color-accent),
+      0 0 15px var(--color-secondary);
+    animation: statGlitchSkew 0.3s infinite;
+    display: inline-block;
+  }
+
+  @keyframes statGlitchSkew {
+    0%, 100% { transform: skew(0deg) scale(1.05); }
+    20% { transform: skew(5deg) scale(0.95); }
+    40% { transform: skew(-8deg) scale(1.02); }
+    60% { transform: skew(3deg) scale(0.98); }
+    80% { transform: skew(-3deg) scale(1.05); }
+  }
+
+  /* 卡片悬浮时也带有轻微的呼吸发光 */
+  .stat-item:hover .stat-number {
+    color: var(--color-text-primary);
+    text-shadow: 
+      0 0 10px var(--color-accent),
+      0 0 20px var(--color-secondary);
+    transition: all 0.3s ease;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .stat-item {
+      padding: 10px 20px;
+      min-width: 100px;
+      flex: 1;
+    }
+    
+    .stat-number {
+      font-size: 1.8rem;
+    }
+  }
+</style>

@@ -1,0 +1,935 @@
+---
+// src/components/RitualModal.astro
+---
+
+<div class="ritual-modal-overlay" id="ritualModalOverlay">
+  <div class="ritual-modal-container">
+    <!-- 头部高科技线条装饰 -->
+    <div class="modal-header-glow"></div>
+    
+    <header class="modal-header">
+      <div class="header-title">
+        <span class="pulse-dot"></span>
+        <h2>赛博超度协议 // DIGITAL SOUL LIBERATION</h2>
+      </div>
+      <button class="modal-close-x" id="modalCloseX">×</button>
+    </header>
+
+    <div class="modal-body">
+      <div class="project-info">
+        正在超度项目：<strong id="targetProjectName" class="glow-text">NFT Marketplace</strong>
+      </div>
+      
+      <!-- 功德液晶统计面板 -->
+      <div class="lcd-panel">
+        <div class="lcd-item">
+          <span class="lcd-label">项目功德 // PROJECT VIRTUE</span>
+          <span class="lcd-number" id="projectVirtueVal">00000</span>
+        </div>
+        <div class="lcd-item">
+          <span class="lcd-label">全站功德 // TOTAL VIRTUE</span>
+          <span class="lcd-number" id="totalVirtueVal">00000</span>
+        </div>
+      </div>
+
+      <!-- 仪式页签切换 -->
+      <div class="ritual-tabs">
+        <button class="ritual-tab active" data-tab="woodfish">🥁 电子木鱼</button>
+        <button class="ritual-tab" data-tab="incense">🕯️ 全息上香</button>
+        <button class="ritual-tab" data-tab="flower">🌹 赛博鲜花</button>
+      </div>
+
+      <!-- 仪式内容区域 -->
+      <div class="tab-contents">
+        <!-- 电子木鱼 -->
+        <div class="tab-content active" id="content-woodfish">
+          <p class="tab-desc">点击木鱼敲击数字代码，为死去的项目超度累积功德。听到高科技电子木鱼声了吗？</p>
+          <div class="woodfish-area">
+            <div class="float-virtue-container" id="floatVirtueContainer"></div>
+            <div class="woodfish-orb" id="woodfishOrb">
+              <span class="woodfish-icon">🏮</span>
+              <div class="orb-halo"></div>
+            </div>
+            <div class="woodfish-reflection"></div>
+          </div>
+          <button class="ritual-action-btn" id="woodfishActionBtn">敲击木鱼 // TAP WOODFISH</button>
+        </div>
+
+        <!-- 全息上香 -->
+        <div class="tab-content" id="content-incense">
+          <p class="tab-desc">插上三炷全息电香，让虚拟数据香雾飘散，愿其后端无死锁，主线不报错。</p>
+          <div class="incense-area">
+            <div class="incense-burner">
+              <div class="burner-pot">🤖</div>
+              <div class="incense-sticks">
+                <div class="incense-stick" id="stick-1">
+                  <div class="stick-core"></div>
+                  <div class="stick-glow"></div>
+                  <div class="smoke-generator" id="smoke-1"></div>
+                </div>
+                <div class="incense-stick" id="stick-2">
+                  <div class="stick-core"></div>
+                  <div class="stick-glow"></div>
+                  <div class="smoke-generator" id="smoke-2"></div>
+                </div>
+                <div class="incense-stick" id="stick-3">
+                  <div class="stick-core"></div>
+                  <div class="stick-glow"></div>
+                  <div class="smoke-generator" id="smoke-3"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="ritual-action-btn" id="incenseActionBtn">点击上香 // IGNITE NEON INCENSE</button>
+        </div>
+
+        <!-- 赛博鲜花 -->
+        <div class="tab-content" id="content-flower">
+          <p class="tab-desc">献上一朵永不凋谢的赛博数字几何像素花，愿它的源码在 GitHub 归档里安息。</p>
+          <div class="flower-area">
+            <div class="flower-glow" id="flowerGlow">
+              <div class="flower-stem"></div>
+              <div class="flower-petals">
+                <div class="petal p1"></div>
+                <div class="petal p2"></div>
+                <div class="petal p3"></div>
+                <div class="petal p4"></div>
+              </div>
+            </div>
+          </div>
+          <button class="ritual-action-btn" id="flowerActionBtn">献上鲜花 // OFFER DIGITAL FLOWER</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="modal-footer">
+      <div class="neon-line"></div>
+      <button class="close-btn" id="modalCloseBtn">[ESC] 关闭超度协议 // DISCONNECT</button>
+    </footer>
+  </div>
+</div>
+
+<style>
+  /* 弹窗遮罩 */
+  .ritual-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(3, 3, 5, 0.85);
+    backdrop-filter: blur(10px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ritual-modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* 弹窗容器 */
+  .ritual-modal-container {
+    background: var(--color-bg-base);
+    border: 2px solid var(--color-secondary);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 520px;
+    box-shadow: 
+      0 0 35px hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.3),
+      0 10px 40px rgba(0, 0, 0, 0.8);
+    position: relative;
+    overflow: hidden;
+    transform: scale(0.9);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ritual-modal-overlay.active .ritual-modal-container {
+    transform: scale(1);
+  }
+
+  /* 顶部发光条 */
+  .modal-header-glow {
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--color-decorative));
+    box-shadow: 0 0 10px var(--color-secondary);
+  }
+
+  /* 头部 */
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--color-primary);
+    animation: blink 1.5s infinite alternate;
+  }
+
+  @keyframes blink {
+    0% { opacity: 0.2; }
+    100% { opacity: 1; }
+  }
+
+  .header-title h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.95rem;
+    color: var(--color-text-primary);
+    letter-spacing: 0.05em;
+    font-weight: 900;
+  }
+
+  .modal-close-x {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 1.8rem;
+    cursor: pointer;
+    line-height: 0.8;
+    transition: color 0.3s ease;
+  }
+
+  .modal-close-x:hover {
+    color: var(--color-primary);
+  }
+
+  /* 内容区域 */
+  .modal-body {
+    padding: 24px;
+  }
+
+  .project-info {
+    font-size: 1.05rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 15px;
+    border-bottom: 1px dashed var(--color-border-subtle);
+    padding-bottom: 10px;
+  }
+
+  .glow-text {
+    color: var(--color-secondary);
+    text-shadow: 0 0 10px hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.4);
+    font-family: 'Orbitron', sans-serif;
+    margin-left: 5px;
+  }
+
+  /* LCD 面板 */
+  .lcd-panel {
+    background: var(--color-lcd-bg);
+    border: 1px solid var(--color-lcd-border);
+    border-radius: 4px;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+  }
+
+  .lcd-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lcd-label {
+    font-size: 0.65rem;
+    color: var(--color-lcd-text);
+    letter-spacing: 0.05em;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+
+  .lcd-number {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-lcd-glow);
+    text-shadow: 0 0 8px var(--color-lcd-glow);
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+  }
+
+  /* 仪式选项卡 */
+  .ritual-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .ritual-tab {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border-subtle);
+    color: var(--color-text-muted);
+    padding: 8px 10px;
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+
+  .ritual-tab:hover {
+    color: var(--color-text-primary);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .ritual-tab.active {
+    background: hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.05);
+    border-color: var(--color-secondary);
+    color: var(--color-secondary);
+    box-shadow: 0 0 10px hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.15);
+  }
+
+  /* 选项卡内容 */
+  .tab-content {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tab-content.active {
+    display: flex;
+  }
+
+  .tab-desc {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  /* 仪式交互区域 */
+  .ritual-action-btn {
+    width: 100%;
+    background: var(--darker-bg);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    padding: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+
+  .ritual-action-btn:hover {
+    background: rgba(255, 0, 60, 0.08);
+    border-color: var(--neon-pink);
+    color: var(--neon-pink);
+    box-shadow: 0 0 15px rgba(255, 0, 60, 0.25);
+  }
+
+  .ritual-action-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* 1. 电子木鱼样式 */
+  .woodfish-area {
+    width: 160px;
+    height: 160px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .woodfish-orb {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #222, #050508);
+    border: 2px solid rgba(0, 240, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+    z-index: 10;
+  }
+
+  .woodfish-orb.tapped {
+    transform: scale(0.92);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+  }
+
+  .woodfish-icon {
+    font-size: 3.5rem;
+    user-select: none;
+    filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.3));
+    transition: filter 0.1s ease;
+  }
+
+  .woodfish-orb.tapped .woodfish-icon {
+    filter: drop-shadow(0 0 18px var(--neon-cyan));
+  }
+
+  .orb-halo {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 240, 255, 0.1);
+    animation: spinOrb 12s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes spinOrb {
+    100% { transform: rotate(360deg); }
+  }
+
+  .float-virtue-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  /* 浮动文字粒子 */
+  .float-text {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 8px var(--neon-cyan);
+    animation: floatUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    pointer-events: none;
+  }
+
+  @keyframes floatUp {
+    0% {
+      top: 50%;
+      opacity: 0;
+      transform: translateX(-50%) translateY(0) scale(0.8);
+    }
+    15% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-20px) scale(1.1);
+    }
+    100% {
+      top: 0%;
+      opacity: 0;
+      transform: translateX(-50%) translateY(-50px) scale(0.9);
+    }
+  }
+
+  /* 2. 上香样式 */
+  .incense-area {
+    height: 160px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+
+  .incense-burner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .incense-sticks {
+    display: flex;
+    gap: 15px;
+    margin-bottom: -5px;
+    z-index: 10;
+  }
+
+  .incense-stick {
+    width: 5px;
+    height: 70px;
+    background: #5c3b1e;
+    position: relative;
+    border-radius: 2px;
+    transition: height 0.5s ease;
+  }
+
+  .incense-stick.ignited {
+    background: linear-gradient(to top, #5c3b1e 80%, #ff6b00 100%);
+  }
+
+  .stick-core {
+    position: absolute;
+    top: 0;
+    left: 1px;
+    width: 3px;
+    height: 3px;
+    background: #ff003c;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .incense-stick.ignited .stick-core {
+    opacity: 1;
+    box-shadow: 
+      0 0 6px var(--neon-pink),
+      0 0 12px var(--neon-pink);
+    animation: corePulse 1s infinite alternate;
+  }
+
+  @keyframes corePulse {
+    0% { transform: scale(1); filter: brightness(1); }
+    100% { transform: scale(1.3); filter: brightness(1.4); }
+  }
+
+  /* 上香烟雾 */
+  .smoke-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: rgba(0, 240, 255, 0.15);
+    border-radius: 50%;
+    filter: blur(4px);
+    animation: smokeDrift 2s linear forwards;
+    pointer-events: none;
+  }
+
+  @keyframes smokeDrift {
+    0% {
+      transform: translateY(0) scale(1) translateX(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.6;
+    }
+    50% {
+      transform: translateY(-40px) scale(2.5) translateX(var(--drift-x, 10px));
+      opacity: 0.3;
+    }
+    100% {
+      transform: translateY(-90px) scale(4) translateX(calc(var(--drift-x, 10px) * 2));
+      opacity: 0;
+    }
+  }
+
+  .burner-pot {
+    font-size: 2.2rem;
+    background: linear-gradient(145deg, #1f1f2e, #0e0e15);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 50% 50% 10% 10%;
+    width: 70px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+      0 5px 15px rgba(0,0,0,0.5),
+      inset 0 2px 5px rgba(255,255,255,0.1);
+    z-index: 5;
+  }
+
+  /* 3. 鲜花样式 */
+  .flower-area {
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+
+  .flower-glow {
+    position: relative;
+    width: 80px;
+    height: 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0.1;
+    transform: scale(0.8) rotate(-5deg);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .flower-glow.active {
+    opacity: 1;
+    transform: scale(1.1) rotate(0);
+    filter: drop-shadow(0 0 15px rgba(188, 19, 254, 0.5));
+  }
+
+  .flower-stem {
+    width: 4px;
+    height: 60px;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 8px var(--neon-cyan);
+    position: absolute;
+    bottom: 0;
+    border-radius: 2px;
+  }
+
+  .flower-petals {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    animation: spinFlower 20s linear infinite;
+  }
+
+  @keyframes spinFlower {
+    100% { transform: rotate(360deg); }
+  }
+
+  .petal {
+    width: 22px;
+    height: 22px;
+    background: var(--neon-purple);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    margin: 1.5px;
+    box-shadow: inset 0 0 5px rgba(255,255,255,0.3);
+  }
+
+  .petal.p1 { border-radius: 12px 12px 2px 12px; background: var(--neon-purple); }
+  .petal.p2 { border-radius: 12px 12px 12px 2px; background: var(--neon-pink); }
+  .petal.p3 { border-radius: 12px 2px 12px 12px; background: var(--neon-pink); }
+  .petal.p4 { border-radius: 2px 12px 12px 12px; background: var(--neon-purple); }
+
+  /* 页脚 */
+  .modal-footer {
+    padding: 15px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .neon-line {
+    width: 100%;
+    height: 1px;
+    background: rgba(0, 240, 255, 0.15);
+    margin-bottom: 15px;
+  }
+
+  .close-btn {
+    background: transparent;
+    border: none;
+    color: #666;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .close-btn:hover {
+    color: var(--neon-pink);
+  }
+</style>
+
+<script>
+  let audioContext: AudioContext | null = null;
+
+  // 1. Web Audio API 音效合成器 (Pluck / Synth generator)
+  function playSynthPluck(freq = 440, duration = 0.2, type: OscillatorType = 'sine') {
+    try {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
+
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+      // 指数级降频衰减，造就打击乐 pluck 音色
+      osc.frequency.exponentialRampToValueAtTime(freq / 4, audioContext.currentTime + duration * 0.7);
+
+      gain.gain.setValueAtTime(0.4, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+
+      osc.start();
+      osc.stop(audioContext.currentTime + duration);
+    } catch (e) {
+      console.warn('音频合成失败，请检查浏览器权限:', e);
+    }
+  }
+
+  // 上香和弦合成
+  function playIncenseChord() {
+    const freqs = [220, 277.18, 329.63, 440]; // A Major Chord
+    freqs.forEach((freq, i) => {
+      setTimeout(() => {
+        playSynthPluck(freq, 0.5, 'sine');
+      }, i * 60);
+    });
+  }
+
+  function initRitualModal() {
+    const overlay = document.getElementById('ritualModalOverlay');
+    const container = document.querySelector('.ritual-modal-container');
+    const closeX = document.getElementById('modalCloseX');
+    const closeBtn = document.getElementById('modalCloseBtn');
+    const targetProjectName = document.getElementById('targetProjectName');
+    
+    // 功德计数
+    const projectVirtueVal = document.getElementById('projectVirtueVal');
+    const totalVirtueVal = document.getElementById('totalVirtueVal');
+
+    if (!overlay || !container) return;
+
+    let activeProject = '';
+
+    // 读取本地功德点数
+    function updateLCDCounters() {
+      if (!projectVirtueVal || !totalVirtueVal) return;
+      
+      const projectVirtue = localStorage.getItem(`virtue_${activeProject}`) || '0';
+      const totalVirtue = localStorage.getItem('global_virtue') || '0';
+      
+      // LCD 零补齐
+      projectVirtueVal.textContent = projectVirtue.padStart(5, '0');
+      totalVirtueVal.textContent = totalVirtue.padStart(5, '0');
+    }
+
+    function addVirtue(points = 1) {
+      const currentProj = parseInt(localStorage.getItem(`virtue_${activeProject}`) || '0');
+      const currentGlobal = parseInt(localStorage.getItem('global_virtue') || '0');
+
+      localStorage.setItem(`virtue_${activeProject}`, (currentProj + points).toString());
+      localStorage.setItem('global_virtue', (currentGlobal + points).toString());
+
+      updateLCDCounters();
+    }
+
+    // 监听打开事件
+    window.removeEventListener('open-ritual-modal', handleOpenEvent);
+    window.addEventListener('open-ritual-modal', handleOpenEvent);
+
+    function handleOpenEvent(e: Event) {
+      const customEvent = e as CustomEvent;
+      const title = customEvent.detail.title || '未知项目';
+      
+      activeProject = title;
+      if (targetProjectName) {
+        targetProjectName.textContent = title;
+      }
+
+      // 重置各交互状态
+      resetIncense();
+      resetFlower();
+
+      updateLCDCounters();
+      
+      overlay?.classList.add('active');
+    }
+
+    // 关闭逻辑
+    function closeModal() {
+      overlay?.classList.remove('active');
+    }
+
+    closeX?.addEventListener('click', closeModal);
+    closeBtn?.addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal();
+    });
+
+    // 键盘 ESC 退出支持
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay.classList.contains('active')) {
+        closeModal();
+      }
+    });
+
+    // ================== 页签切换 ==================
+    const tabs = document.querySelectorAll('.ritual-tab');
+    const contents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        contents.forEach(c => c.classList.remove('active'));
+
+        tab.classList.add('active');
+        const targetTab = tab.getAttribute('data-tab');
+        const targetContent = document.getElementById(`content-${targetTab}`);
+        if (targetContent) {
+          targetContent.classList.add('active');
+        }
+
+        // 切换音效
+        playSynthPluck(880, 0.08, 'sine');
+      });
+    });
+
+    // ================== 1. 木鱼交互 ==================
+    const woodfishOrb = document.getElementById('woodfishOrb');
+    const floatVirtueContainer = document.getElementById('floatVirtueContainer');
+    const woodfishActionBtn = document.getElementById('woodfishActionBtn');
+
+    function tapWoodfish() {
+      if (!woodfishOrb) return;
+      
+      // 触发微缩弹力动画
+      woodfishOrb.classList.add('tapped');
+      setTimeout(() => woodfishOrb.classList.remove('tapped'), 100);
+
+      // 播放高科技合成木鱼声
+      playSynthPluck(293.66, 0.18, 'triangle'); // D4 triangle note sounds like a digital wood fish
+
+      // 创建飘起“功德 +1”字粒子
+      if (floatVirtueContainer) {
+        const floatText = document.createElement('span');
+        floatText.className = 'float-text';
+        floatText.textContent = '功德 +1 // VIRTUE';
+        
+        // 随机左右偏移位置
+        floatText.style.left = (40 + Math.random() * 20) + '%';
+        floatVirtueContainer.appendChild(floatText);
+
+        // 动画播放完自动销毁
+        setTimeout(() => floatText.remove(), 800);
+      }
+
+      addVirtue(1);
+    }
+
+    woodfishOrb?.addEventListener('click', tapWoodfish);
+    woodfishActionBtn?.addEventListener('click', tapWoodfish);
+
+    // ================== 2. 全息香火交互 ==================
+    const incenseActionBtn = document.getElementById('incenseActionBtn');
+    const sticks = document.querySelectorAll('.incense-stick');
+    let isIncenseIgnited = false;
+    let smokeIntervals: number[] = [];
+
+    function resetIncense() {
+      isIncenseIgnited = false;
+      sticks.forEach(stick => stick.classList.remove('ignited'));
+      smokeIntervals.forEach(clearInterval);
+      smokeIntervals = [];
+      
+      const generators = document.querySelectorAll('.smoke-generator');
+      generators.forEach(gen => gen.innerHTML = '');
+      
+      if (incenseActionBtn) {
+        incenseActionBtn.textContent = '点击上香 // IGNITE NEON INCENSE';
+      }
+    }
+
+    function igniteIncense() {
+      if (isIncenseIgnited) return;
+      isIncenseIgnited = true;
+
+      sticks.forEach((stick, index) => {
+        setTimeout(() => {
+          stick.classList.add('ignited');
+        }, index * 200);
+      });
+
+      // 播放和弦起音
+      playIncenseChord();
+
+      // 创建持续冒烟动画粒子
+      const generators = document.querySelectorAll('.smoke-generator');
+      generators.forEach((gen, index) => {
+        const interval = window.setInterval(() => {
+          if (!overlay.classList.contains('active')) return;
+          
+          const particle = document.createElement('div');
+          particle.className = 'smoke-particle';
+          particle.style.left = (Math.random() * 8 - 4) + 'px';
+          // 漂移方向和宽度
+          const drift = (Math.random() * 30 - 15);
+          particle.style.setProperty('--drift-x', `${drift}px`);
+          
+          gen.appendChild(particle);
+          setTimeout(() => particle.remove(), 2000);
+        }, 150);
+        
+        smokeIntervals.push(interval);
+      });
+
+      if (incenseActionBtn) {
+        incenseActionBtn.textContent = '香火旺盛 // INCENSE BURNING';
+      }
+
+      addVirtue(9); // 上香增加大额功德！
+    }
+
+    incenseActionBtn?.addEventListener('click', igniteIncense);
+
+    // ================== 3. 鲜花交互 ==================
+    const flowerActionBtn = document.getElementById('flowerActionBtn');
+    const flowerGlow = document.getElementById('flowerGlow');
+    let isFlowerOffered = false;
+
+    function resetFlower() {
+      isFlowerOffered = false;
+      flowerGlow?.classList.remove('active');
+      if (flowerActionBtn) {
+        flowerActionBtn.textContent = '献上鲜花 // OFFER DIGITAL FLOWER';
+      }
+    }
+
+    function offerFlower() {
+      if (isFlowerOffered) return;
+      isFlowerOffered = true;
+
+      flowerGlow?.classList.add('active');
+
+      // 播放空灵花开音效 (synth arpeggio)
+      const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99]; // C major arpeggio
+      notes.forEach((freq, idx) => {
+        setTimeout(() => {
+          playSynthPluck(freq, 0.4, 'sine');
+        }, idx * 80);
+      });
+
+      if (flowerActionBtn) {
+        flowerActionBtn.textContent = '已献上像素花 // FLOWER OFFERED';
+      }
+
+      addVirtue(15); // 献花增加超级大功德！
+    }
+
+    flowerActionBtn?.addEventListener('click', offerFlower);
+  }
+
+  // 支持 View Transitions
+  document.addEventListener('astro:page-load', initRitualModal);
+  initRitualModal();
+</script>

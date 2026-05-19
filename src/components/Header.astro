@@ -1,0 +1,148 @@
+---
+// src/components/Header.astro
+import type { CollectionEntry } from 'astro:content';
+import CyberMarquee from './CyberMarquee.astro';
+import DecryptedStat from './DecryptedStat.astro';
+
+interface Props {
+  projects: CollectionEntry<'projects'>[];
+}
+
+const { projects = [] } = Astro.props;
+
+// 动态计算数据
+const projectCount = projects.length;
+const uniqueTechs = new Set(projects.flatMap(p => p.data.tech)).size;
+---
+
+<CyberMarquee projectCount={projectCount} />
+
+<header class="hero">
+  <div class="glow-avatar-wrapper">
+    <span class="grave-emoji">🪦</span>
+  </div>
+  <h1>Cyber Code Graveyard</h1>
+  <p class="subtitle">这里安息着那些曾经辉煌却最终死去的代码项目<br/>R.I.P. - Rest In Pieces</p>
+  
+  <div class="manifesto-btn-container">
+    <a href="/manifesto" class="manifesto-btn">
+      📖 阅读《赛博坟场宣言》 // READ MANIFESTO
+    </a>
+  </div>
+  
+  <div class="stats">
+    <DecryptedStat target={projectCount} label="已埋葬项目" />
+    <DecryptedStat target={uniqueTechs} suffix="+" label="技术栈" />
+    <DecryptedStat staticValue="∞" label="遗憾" />
+  </div>
+</header>
+
+<style>
+  /* 头部区域 */
+  .hero {
+    text-align: center;
+    padding: 80px 20px 40px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .glow-avatar-wrapper {
+    margin-bottom: 15px;
+    display: inline-block;
+    animation: pulseGlow 4s infinite alternate;
+  }
+
+  .grave-emoji {
+    font-size: 3.5rem;
+    filter: drop-shadow(0 0 15px var(--color-primary));
+  }
+
+  @keyframes pulseGlow {
+    0% { transform: scale(1); filter: brightness(1); }
+    100% { transform: scale(1.05); filter: brightness(1.2); }
+  }
+
+  .hero h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2.2rem, 6vw, 4.5rem);
+    font-weight: 900;
+    color: var(--color-text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-shadow: 
+      0 0 10px var(--color-primary),
+      0 0 20px var(--color-primary),
+      0 0 30px var(--color-primary);
+    animation: flicker 2s infinite alternate;
+    margin-bottom: 20px;
+  }
+
+  @keyframes flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      opacity: 1;
+      text-shadow: 
+        0 0 10px var(--color-primary),
+        0 0 20px var(--color-primary),
+        0 0 30px var(--color-primary);
+    }
+    20%, 24%, 55% {
+      opacity: 0.85;
+      text-shadow: 0 0 2px var(--color-primary);
+    }
+  }
+
+  .hero .subtitle {
+    font-size: 1.15rem;
+    color: var(--color-secondary);
+    text-shadow: 0 0 10px hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.4);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+
+  .manifesto-btn-container {
+    margin-top: 25px;
+  }
+
+  .manifesto-btn {
+    display: inline-block;
+    color: var(--color-secondary);
+    text-decoration: none;
+    border: 1px solid hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.4);
+    padding: 10px 25px;
+    background: hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.05);
+    font-family: 'Share Tech Mono', monospace;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    border-radius: 4px;
+    box-shadow: 0 0 10px hsla(var(--color-secondary-h), var(--color-secondary-s), var(--color-secondary-l), 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .manifesto-btn:hover {
+    background: var(--color-secondary);
+    color: #000;
+    box-shadow: 0 0 15px var(--color-secondary);
+    transform: translateY(-2px);
+  }
+
+  .hero .stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .hero {
+      padding: 60px 15px 30px;
+    }
+    
+    .stats {
+      gap: 15px;
+    }
+  }
+</style>

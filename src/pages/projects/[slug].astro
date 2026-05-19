@@ -1,0 +1,31 @@
+---
+// src/pages/projects/[slug].astro
+import { getCollection, render } from 'astro:content';
+import MarkdownLayout from '../../layouts/MarkdownLayout.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map(entry => ({
+    params: { slug: entry.id.replace(/\.md$/, '') },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+
+// 将项目数据包装成与 MarkdownLayout 兼容的 frontmatter 格式
+const frontmatter = {
+  title: entry.data.title,
+  description: entry.data.description || entry.data.cause,
+  date: entry.data.deathDate,
+  author: entry.data.author,
+  tags: [...entry.data.tech, entry.data.status],
+  cause: entry.data.cause,
+  epitaph: entry.data.epitaph,
+};
+---
+
+<MarkdownLayout frontmatter={frontmatter} headings={headings}>
+  <Content />
+</MarkdownLayout>

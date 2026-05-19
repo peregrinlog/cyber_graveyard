@@ -1,0 +1,40 @@
+---
+// src/components/Footer.astro
+---
+
+<footer class="footer">
+  <p class="footer-text">
+    Made with <span>❤️</span> and tears | 每一个死去的项目都是通往成功的垫脚石<br/>
+    © 2024 Cyber Code Graveyard - 纪念所有失败的尝试
+  </p>
+</footer>
+
+<style>
+  .footer {
+    text-align: center;
+    padding: 60px 20px;
+    border-top: 1px solid var(--color-border-subtle);
+    background: color-mix(in srgb, var(--color-bg-base) 40%, transparent);
+    margin-top: 60px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .footer-text {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    line-height: 1.8;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .footer-text span {
+    color: var(--color-primary);
+    display: inline-block;
+    animation: pulseHeart 1s infinite alternate;
+  }
+
+  @keyframes pulseHeart {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.2); }
+  }
+</style>

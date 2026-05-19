@@ -1,0 +1,262 @@
+---
+// src/layouts/Layout.astro
+import CyberWatermark from '../components/CyberWatermark.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { 
+  title = "🪦 赛博代码坟场 | Cyber Code Graveyard", 
+  description = "赛博代码坟场 - 纪念那些死去的开源项目" 
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="description" content={description} />
+		<title>{title}</title>
+		
+		<style is:global>
+			@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+			
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			
+			:root {
+				/* --- 物理色盘 HSL 分量 (Primitive Palette) --- */
+				--palette-pink-h: 346;
+				--palette-pink-s: 100%;
+				--palette-pink-l: 50%;
+				--palette-pink: hsl(var(--palette-pink-h), var(--palette-pink-s), var(--palette-pink-l));
+
+				--palette-cyan-h: 180;
+				--palette-cyan-s: 100%;
+				--palette-cyan-l: 50%;
+				--palette-cyan: hsl(var(--palette-cyan-h), var(--palette-cyan-s), var(--palette-cyan-l));
+
+				--palette-yellow-h: 56;
+				--palette-yellow-s: 96%;
+				--palette-yellow-l: 51%;
+				--palette-yellow: hsl(var(--palette-yellow-h), var(--palette-yellow-s), var(--palette-yellow-l));
+
+				--palette-purple-h: 283;
+				--palette-purple-s: 98%;
+				--palette-purple-l: 54%;
+				--palette-purple: hsl(var(--palette-purple-h), var(--palette-purple-s), var(--palette-purple-l));
+
+				--palette-orange-h: 25;
+				--palette-orange-s: 100%;
+				--palette-orange-l: 50%;
+				--palette-orange: hsl(var(--palette-orange-h), var(--palette-orange-s), var(--palette-orange-l));
+
+				/* --- 极暗黑客背景色盘 --- */
+				--palette-dark-900: #050508;
+				--palette-dark-800: #0a0a0f;
+				--palette-dark-700: #12121a;
+				--palette-dark-600: #1e1e2a;
+
+				/* --- 语义角色 Token (Semantic Tokens) --- */
+				--color-bg-base: var(--palette-dark-800);
+				--color-bg-surface: var(--palette-dark-700);
+				--color-bg-surface-elevated: var(--palette-dark-600);
+
+				--color-primary: var(--palette-pink);
+				--color-primary-h: var(--palette-pink-h);
+				--color-primary-s: var(--palette-pink-s);
+				--color-primary-l: var(--palette-pink-l);
+
+				--color-secondary: var(--palette-cyan);
+				--color-secondary-h: var(--palette-cyan-h);
+				--color-secondary-s: var(--palette-cyan-s);
+				--color-secondary-l: var(--palette-cyan-l);
+
+				--color-accent: var(--palette-yellow);
+				--color-accent-h: var(--palette-yellow-h);
+				--color-accent-s: var(--palette-yellow-s);
+				--color-accent-l: var(--palette-yellow-l);
+
+				--color-warning: var(--palette-orange);
+				--color-warning-h: var(--palette-orange-h);
+				--color-warning-s: var(--palette-orange-s);
+				--color-warning-l: var(--palette-orange-l);
+
+				--color-decorative: var(--palette-purple);
+				--color-decorative-h: var(--palette-purple-h);
+				--color-decorative-s: var(--palette-purple-s);
+				--color-decorative-l: var(--palette-purple-l);
+
+				--color-text-primary: #ffffff;
+				--color-text-secondary: #e0e0e0;
+				--color-text-muted: #888888;
+
+				--color-border-subtle: rgba(255, 255, 255, 0.05);
+				--color-border-accent: rgba(0, 240, 255, 0.15);
+				--color-grid-overlay: rgba(0, 240, 255, 0.08);
+
+				/* --- 状态系统映射 (Status Semantic Mapping) --- */
+				--color-status-terminated: var(--color-primary);
+				--color-status-abandoned: var(--color-accent);
+				--color-status-deprecated: var(--color-secondary);
+				--color-status-liquidated: var(--color-warning);
+				--color-status-delisted: var(--color-decorative);
+
+				/* --- 功德液晶 LCD 独立语义系统 (Retro LCD Panel Sub-system) --- */
+				--color-lcd-bg: #050b06;
+				--color-lcd-border: #142f17;
+				--color-lcd-text: #1b5b22;
+				--color-lcd-glow: #33ff33;
+
+				/* --- 兼容旧版命名以防破坏全局样式 (Legacy Aliases) --- */
+				--neon-pink: var(--color-primary);
+				--neon-cyan: var(--color-secondary);
+				--neon-yellow: var(--color-accent);
+				--neon-purple: var(--color-decorative);
+				--dark-bg: var(--color-bg-base);
+				--darker-bg: var(--palette-dark-900);
+				--grid-color: var(--color-grid-overlay);
+			}
+			
+			body {
+				font-family: 'Share Tech Mono', monospace;
+				background: var(--dark-bg);
+				color: #e0e0e0;
+				min-height: 100vh;
+				overflow-x: hidden;
+				line-height: 1.6;
+			}
+			
+			/* 背景网格动画 */
+			.cyber-grid {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background-image: 
+					linear-gradient(var(--grid-color) 1px, transparent 1px),
+					linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+				background-size: 50px 50px;
+				perspective: 500px;
+				transform-style: preserve-3d;
+				animation: gridMove 20s linear infinite;
+				z-index: -2;
+				opacity: 0.3;
+				pointer-events: none;
+			}
+			
+			@keyframes gridMove {
+				0% { transform: translateY(0) rotateX(60deg); }
+				100% { transform: translateY(50px) rotateX(60deg); }
+			}
+			
+			/* 扫描线效果 */
+			.scanlines {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: repeating-linear-gradient(
+					0deg,
+					rgba(0, 0, 0, 0.1),
+					rgba(0, 0, 0, 0.1) 1px,
+					transparent 1px,
+					transparent 2px
+				);
+				pointer-events: none;
+				z-index: 1000;
+			}
+			
+			/* 粒子效果容器 */
+			.particles {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				pointer-events: none;
+				z-index: -1;
+			}
+			
+			.particle {
+				position: absolute;
+				width: 4px;
+				height: 4px;
+				background: var(--neon-cyan);
+				border-radius: 50%;
+				opacity: 0.6;
+				animation: float 15s infinite;
+			}
+			
+			@keyframes float {
+				0%, 100% {
+					transform: translateY(100vh) rotate(0deg);
+					opacity: 0;
+				}
+				10% {
+					opacity: 0.6;
+				}
+				90% {
+					opacity: 0.6;
+				}
+				100% {
+					transform: translateY(-100vh) rotate(720deg);
+					opacity: 0;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<CyberWatermark />
+		<div class="cyber-grid"></div>
+		<div class="scanlines"></div>
+		<div class="particles" id="particles"></div>
+		
+		<slot />
+		
+		<script>
+			function initGlobalParticles() {
+				const particlesContainer = document.getElementById('particles');
+				if (!particlesContainer) return;
+				
+				// 清理旧的粒子以防 View Transitions 重复累加
+				particlesContainer.innerHTML = '';
+				
+				const particleCount = 30;
+				for (let i = 0; i < particleCount; i++) {
+					const particle = document.createElement('div');
+					particle.className = 'particle';
+					particle.style.left = Math.random() * 100 + '%';
+					particle.style.animationDelay = Math.random() * 15 + 's';
+					particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+					
+					const colors = [
+						'--color-primary',
+						'--color-secondary',
+						'--color-accent',
+						'--color-decorative'
+					].map(v => getComputedStyle(document.documentElement).getPropertyValue(v).trim());
+					particle.style.background = colors[Math.floor(Math.random() * colors.length)] || 'var(--color-primary)';
+					
+					particlesContainer.appendChild(particle);
+				}
+			}
+
+			// 支持 Astro View Transitions 与原生加载
+			document.addEventListener('astro:page-load', initGlobalParticles);
+			if (document.readyState === 'complete' || document.readyState === 'interactive') {
+				initGlobalParticles();
+			} else {
+				document.addEventListener('DOMContentLoaded', initGlobalParticles);
+			}
+		</script>
+	</body>
+</html>
