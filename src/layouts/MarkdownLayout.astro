@@ -60,6 +60,40 @@ const status = frontmatter?.status || tags.find(t => knownStatuses.includes(t.to
   <Footer />
 </Layout>
 
+<script>
+  function initEscNavigation() {
+    if ((window as any).__escNavigationHandler) {
+      document.removeEventListener('keydown', (window as any).__escNavigationHandler);
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        const modalOverlay = document.getElementById('ritualModalOverlay');
+        const isModalActive = modalOverlay && modalOverlay.classList.contains('active');
+        
+        if (!isModalActive) {
+          const backBtn = document.querySelector('.back-btn') as HTMLAnchorElement | null;
+          if (backBtn) {
+            backBtn.click();
+          } else {
+            window.location.href = '/';
+          }
+        }
+      }
+    };
+
+    (window as any).__escNavigationHandler = handleKeyDown;
+    document.addEventListener('keydown', handleKeyDown);
+  }
+
+  document.addEventListener('astro:page-load', initEscNavigation);
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initEscNavigation();
+  } else {
+    document.addEventListener('DOMContentLoaded', initEscNavigation);
+  }
+</script>
+
 <style is:global>
   /* 容器 */
   .doc-container {
