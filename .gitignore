@@ -31,6 +31,7 @@ dist/
 *.egg-info/
 .installed.cfg
 *.so
+.astro/
 
 # OS generated files
 .DS_Store
